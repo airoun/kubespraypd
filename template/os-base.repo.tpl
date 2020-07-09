@@ -1,5 +1,5 @@
 [os-base]
 name=centos base repository
-baseurl=http://${local_repo_listen_addr}:${local_repo_listen_port}${local_yum_repo_uri}
+baseurl=file://${local_yum_repo_base_home}
 enabled=1
 gpgcheck=0

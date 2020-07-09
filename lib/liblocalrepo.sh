@@ -43,33 +43,34 @@ local_yum_repo() {
   local_repo_listen_addr=$2
   local_repo_listen_port=$3
 
-  local_yum_repo_uri="/yum"
-  local_yum_repo_home="${local_repo_home}${local_yum_repo_uri}"
+  local_yum_repo_base_uri="/base"
+  local_yum_repo_local_uri="/local"
 
-  info "*** Just wait a moment ***"
-  if [[ ! -d "${local_yum_repo_home}" ]];
-  then
-    mkdir -p "${local_yum_repo_home}"
-    mount "${project_base_dir}"/pkg/yum/*.iso "${project_base_dir}"/pkg/yum/mnt_tmp &> /dev/null
-    /usr/bin/cp -r "${project_base_dir}"/pkg/yum/mnt_tmp/* "${local_yum_repo_home}"
-    umount "${project_base_dir}"/pkg/yum/mnt_tmp/
-  fi
-  
+  local_yum_repo_base_home="${local_repo_home}${local_yum_repo_base_uri}"
+  local_yum_repo_local_home="${local_repo_home}${local_yum_repo_local_uri}"
+
+  info "*** Create CentOS base repo ***"
+  mkdir -p "${local_yum_repo_base_home}"
+  mount "${project_base_dir}"/pkg/base/*.iso "${project_base_dir}"/pkg/base/mnt_tmp &> /dev/null
+  /usr/bin/cp -r "${project_base_dir}"/pkg/base/mnt_tmp/* "${local_yum_repo_base_home}"
+  umount "${project_base_dir}"/pkg/base/mnt_tmp/
+
+  info "*** Create Local repo ***"
+  mkdir -p "${local_yum_repo_local_home}"
+  /usr/bin/cp -r "${project_base_dir}"/pkg/local/* "${local_yum_repo_local_home}"
+
+
   backup_old_yum_repos
 
   info "*** Configuring local Yum repo ***"
-  export local_repo_listen_addr
-  export local_repo_listen_port
-  export local_yum_repo_uri
+  export local_yum_repo_base_home
+  export local_yum_repo_local_home
 
-  envsubst < "${project_base_dir}"/template/os-base.repo.tpl > /etc/yum.repos.d/os-base.repo
+  envsubst < "${project_base_dir}/template/os-base.repo.tpl" > /etc/yum.repos.d/os-base.repo
+  envsubst < "${project_base_dir}/template/localrepo.repo.tpl" > /etc/yum.repos.d/localrepo.repo 
 
-  export -n local_repo_listen_addr
-  export -n local_repo_listen_port
-  export -n local_yum_repo_uri
-
-  yum clean all &> /dev/null && rm -rf /var/cache/yum
-  yum makecache &> /dev/null 
+  export -n local_yum_repo_base_home
+  export -n local_yum_repo_local_home
 }
 
 ########################
@@ -149,7 +150,7 @@ install_http_service() {
   disable_selinux
 
   info "*** Installing nginx ***"
-  yum -y localinstall "${project_base_dir}"/pkg/yum/nginx/*.rpm > /dev/null 
+  yum -y localinstall "${project_base_dir}"/pkg/local/nginx*.rpm > /dev/null 
 
   export local_repo_listen_port
   export local_repo_home
@@ -179,7 +180,7 @@ install_http_service() {
 #########################
 install_python_3() {
   info "*** Installing python 3 ***"
-  yum -y localinstall "${project_base_dir}"/pkg/yum/python3/*.rpm > /dev/null 
+  yum -y localinstall "${project_base_dir}"/pkg/local/python3*.rpm > /dev/null 
 }
 
 ########################
@@ -209,15 +210,17 @@ download_yum_packages() {
 
   set_internet_yum_repo "${donwload_yum_config_url_list}"
 
+  item_packages_dir="${project_base_dir}/pkg/local"
+  rm -rf "${item_packages_dir}" && mkdir -p "${item_packages_dir}"
+
   for item in $(cat ${rpm_requirements} );
   do
-    item_packages_dir="${project_base_dir}/pkg/yum/${item}"
-    rm -rf "${item_packages_dir}" && mkdir -p "${item_packages_dir}"
     info "*** Downloading Yum ${item} packages ***"
-    yum -y remove "${item}" &> /dev/null 
+    yum -y remove "${item}" &> /dev/null
     yum -y install "${item}" --downloadonly --downloaddir="${item_packages_dir}" &> /dev/null
-    createrepo "${item_packages_dir}" > /dev/null 
   done
+  createrepo "${item_packages_dir}" > /dev/null 
+
 }
 
 ########################
@@ -252,18 +255,22 @@ download_pip_packages() {
 download_centos_iso() {
   donwload_centos_iso_url=$1
 
-  if ls "${project_base_dir}/pkg/yum/*.iso" &> /dev/null;
+  if ls "${project_base_dir}/pkg/base/*.iso" &> /dev/null;
   then
     info "*** There is a iso found, I will use it. ***"
+    use_local_image_file="true"
+  fi
+
+  if [[ -z "${use_local_image_file}" ]];
+  then
+      info "*** There is a iso found, I will use it. ***"
+  elif [[ -n "${use_local_image_file}" && "${downlaod_centos_iso_enabled}" = "true" ]];
+  then
+    info "*** Downloading CentOS iso ***"
+    wget -q -c -O "${project_base_dir}/pkg/base/centos.iso" "${donwload_centos_iso_url}"
   else
-    if [[ "${downlaod_centos_iso_enabled}" = "true" ]];
-    then
-      info "*** Downloading CentOS iso ***"
-      wget -q -c -O "${project_base_dir}"/pkg/yum/centos.iso "${donwload_centos_iso_url}"
-    else
-      error "*** Do not download CentOS iso? I didn't find a iso, exit now. ***"
-      exit 10
-    fi
+    error "*** Do not download CentOS iso? I didn't find a iso, exit now. ***"
+    exit 10
   fi
 }
 

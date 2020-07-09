@@ -54,7 +54,7 @@ backup_old_yum_repos() {
     mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak
   fi
 
-  yum clean all &> /dev/null && rm -fr /var/cache/yum 
+  rm -fr /var/cache/yum 
 }
 
 ########################
