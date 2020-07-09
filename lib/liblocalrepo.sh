@@ -252,7 +252,7 @@ download_pip_packages() {
 download_centos_iso() {
   donwload_centos_iso_url=$1
 
-  if ls "${project_base_dir}/pkg/iso/*.iso" &> /dev/null;
+  if ls "${project_base_dir}/pkg/yum/*.iso" &> /dev/null;
   then
     info "*** There is a iso found, I will use it. ***"
   else
