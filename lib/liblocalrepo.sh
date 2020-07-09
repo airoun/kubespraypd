@@ -194,7 +194,7 @@ install_kubespary_pip_requirements() {
   info "*** Installing kubespary python requirements ***"
   pip3 install --user --quiet -r "${requirements}"
 
-  export PATH=/root/.local/bin:$PATH
+  echo "export PATH=/root/.local/bin:$PATH" >> ~/.bashrc
 }
 
 ########################
