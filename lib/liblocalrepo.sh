@@ -59,7 +59,6 @@ local_yum_repo() {
   mkdir -p "${local_yum_repo_local_home}"
   /usr/bin/cp -r "${project_base_dir}"/pkg/local/* "${local_yum_repo_local_home}"
 
-
   backup_old_yum_repos
 
   info "*** Configuring local Yum repo ***"
