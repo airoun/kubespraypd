@@ -99,17 +99,14 @@ can_i_connect_to_internet() {
 #   None
 #########################
 print_help_message() {
-  printf "使用localrepo设置离线kubespray依赖的源\n"
-  printf "./localrepo.sh {COMMAND}\n"
-  printf "\n"
 
-  printf "%-10s %-20s\n" "命令" "描述"
-  printf "%-10s %-20s\n" "download" "下载离线数据, 需要连接互联网"
-  printf "%-10s %-20s\n" "install" "安装离线软件源"
-  printf "%-10s %-20s\n" "其他字符" "打印这个帮助页"
+  echo "
+使用kubepdpl.sh初始化kubespray controller运行环境和获取k8s镜像
+./kubepdpl.sh {COMMAND}
 
-  printf "\n"
-
-  printf "e.g.\n  ./localrepo.sh download\n  ./localrepo.sh install\n"
-
+COMMANDS:
+  online        在有互联网的机器上部署kubespray controller
+  offline       在没有互联网的机器上部署kubespray controller
+  download      预下载所需软件包
+  "
 }
