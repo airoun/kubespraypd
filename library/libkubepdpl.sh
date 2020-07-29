@@ -31,11 +31,11 @@ set_online_yum_repo() {
 
   cat > /etc/yum.repos.d/"${repo_name}".repo <<EOF
 [${repo_name}]
-name="${repo_name}"-\$releasever
+name=${repo_name}- \$releasever
 enabled=1
-baseurl="${repo_url}"
+baseurl=${repo_url}
 gpgcheck=0
-gpgkey="${repo_gpgkey}"
+gpgkey=${repo_gpgkey}
 
 EOF
 }

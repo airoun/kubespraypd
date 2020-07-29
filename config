@@ -2,13 +2,13 @@
 # Settings for ONLINE
 #########################
 
-online_centos_repo_url="http://mirrors.aliyun.com/centos/$releasever/os/$basearch/"
+online_centos_repo_url="http://mirrors.aliyun.com/centos/\$releasever/os/\$basearch/"
 online_centos_repo_gpgkey="http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7"
 
-online_epel_repo_url="http://mirrors.aliyun.com/epel/7/$basearch"
+online_epel_repo_url="http://mirrors.aliyun.com/epel/7/\$basearch"
 online_epel_repo_gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7"
 
-online_docker_rh_repo_url="https://mirrors.aliyun.com/docker-ce/linux/centos/7/$basearch/stable"
+online_docker_rh_repo_url="https://mirrors.aliyun.com/docker-ce/linux/centos/7/\$basearch/stable"
 online_docker_rh_repo_gpgkey="https://mirrors.aliyun.com/docker-ce/linux/centos/gpg"
 
 online_pip_index_url="https://mirrors.aliyun.com/pypi/simple/"
