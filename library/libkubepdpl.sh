@@ -2,126 +2,57 @@
 
 # Load Functions
 
-. "${project_base_dir}/lib/lib.sh"
-. "${project_base_dir}/lib/liblog.sh"
+. "${project_base_dir}/library/lib.sh"
+. "${project_base_dir}/library/liblog.sh"
 . "${project_base_dir}/config"
 
 ########################
-# Internet YUM repo
+# Online yum repo
 # Arguments:
-#   internet yum repo file
+#   1: repo name
+#   2: repo url
+#   3: repo gpgkey
 # Returns:
 #   None
+# e.g.
+#   set_online_yum_repo centos http://xxxxx http://xxxxx
 #########################
-set_internet_yum_repo() {
-  config_url_list=$1
-  
-  backup_old_yum_repos
+set_online_yum_repo() {
+  repo_name=$1
+  repo_url=$2
+  repo_gpgkey=$3
 
-  info "*** Configuring internet Yum repo ***"
-  for config_url in ${config_url_list};
-  do
-    config_name=$(echo ${config_url} | awk -F "/" '{print $NF}')
-    curl -o /etc/yum.repos.d/"${config_name}" "${config_url}" &> /dev/null
-  done
+  info "*** Configuring online ${repo_name} repo ***"
+  # for config_url in ${config_url_list};
+  # do
+  #   config_name=$(echo ${config_url} | awk -F "/" '{print $NF}')
+  #   curl -o /etc/yum.repos.d/"${config_name}" "${config_url}" &> /dev/null
+  # done
 
-  sleep 2s
+  cat > /etc/yum.repos.d/"${repo_name}".repo <<EOF
+[${repo_name}]
+name="${repo_name}"-\$releasever
+enabled=1
+baseurl="${repo_url}"
+gpgcheck=0
+gpgkey="${repo_gpgkey}"
 
-  yum makecache &> /dev/null 
-  yum -y install wget createrepo net-tools &> /dev/null 
+EOF
 }
 
+
 ########################
-# Local YUM repo
+# Online pip repo
 # Arguments:
-#   local_repo_home
+#   1: pip repo url
 # Returns:
 #   None
 #########################
-local_yum_repo() {
-  local_repo_home=$1
-  local_repo_listen_addr=$2
-  local_repo_listen_port=$3
-
-  local_yum_repo_base_uri="/base"
-  local_yum_repo_local_uri="/local"
-
-  local_yum_repo_base_home="${local_repo_home}${local_yum_repo_base_uri}"
-  local_yum_repo_local_home="${local_repo_home}${local_yum_repo_local_uri}"
-
-  info "*** Create CentOS base repo ***"
-  mkdir -p "${local_yum_repo_base_home}"
-  mount "${project_base_dir}"/pkg/base/*.iso "${project_base_dir}"/pkg/base/mnt_tmp &> /dev/null
-  /usr/bin/cp -r "${project_base_dir}"/pkg/base/mnt_tmp/* "${local_yum_repo_base_home}"
-  umount "${project_base_dir}"/pkg/base/mnt_tmp/
-
-  info "*** Create Local repo ***"
-  mkdir -p "${local_yum_repo_local_home}"
-  /usr/bin/cp -r "${project_base_dir}"/pkg/local/* "${local_yum_repo_local_home}"
-
-  backup_old_yum_repos
-
-  info "*** Configuring local Yum repo ***"
-  export local_yum_repo_base_home
-  export local_yum_repo_local_home
-
-  envsubst < "${project_base_dir}/template/os-base.repo.tpl" > /etc/yum.repos.d/os-base.repo
-  envsubst < "${project_base_dir}/template/localrepo.repo.tpl" > /etc/yum.repos.d/localrepo.repo 
-
-  export -n local_yum_repo_base_home
-  export -n local_yum_repo_local_home
-}
-
-########################
-# Local Pip repo
-# Arguments:
-#   local_repo_home
-#   local_repo_listen_addr
-#   local_repo_listen_port
-# Returns:
-#   None
-#########################
-local_pip_repo() {
-  local_repo_home=$1
-  local_repo_listen_addr=$2
-  local_repo_listen_port=$3
-
-  local_pip_repo_uri="/pypi"
-  local_pip_repo_home="${local_repo_home}${local_pip_repo_uri}"
-
-  mkdir -p "${local_pip_repo_home}"
-  cp -r "${project_base_dir}/pkg/pypi/path/" "${local_pip_repo_home}"
-
-  backup_old_pip_repos
-
-  info "*** Configuring local Pip repo ***"
-
-  export local_repo_listen_addr
-  export local_repo_listen_port
-  export local_pip_repo_uri
-
-  envsubst < "${project_base_dir}"/template/pip.conf.tpl > ~/.pip/pip.conf
-
-  export -n local_repo_listen_addr
-  export -n local_repo_listen_port
-  export -n local_pip_repo_uri
-
-}
-
-########################
-# Internet PIP repo
-# Arguments:
-#   internet pip repo url
-# Returns:
-#   None
-#########################
-set_internet_pip_repo() {
+set_online_pip_repo() {
   index_url=$1
   trusted_host=$2
   
-  backup_old_pip_repos
-
-  info "*** Configuring internet Pip repo ***"
+  info "*** Configuring internet pip repo ***"
   cat > ~/.pip/pip.conf <<EOF
 [global]
 index-url=${index_url}
@@ -132,65 +63,20 @@ trusted-host=${trusted_host}
 EOF
 }
 
+
 ########################
-# Local repo http service
+# Install python3 and ansible
 # Arguments:
-#   local_repo_home
-#   local_repo_listen_addr
-#   local_repo_listen_port
+#   None
 # Returns:
 #   None
 #########################
-install_http_service() {
-  local_repo_home=$1
-  local_repo_listen_addr=$2
-  local_repo_listen_port=$3
+install_python3_and_ansible() {
+  requirements="${project_base_dir}/requirements/pip.txt"
 
-  disable_selinux
-
-  info "*** Installing nginx ***"
-  yum -y localinstall "${project_base_dir}"/pkg/local/nginx*.rpm > /dev/null 
-
-  export local_repo_listen_port
-  export local_repo_home
-
-  envsubst < "${project_base_dir}"/template/nginx.conf.tpl > /etc/nginx/nginx.conf
-
-  export -n local_repo_listen_port
-  export -n local_repo_home
-
-  if systemctl start nginx;
-  then
-    info "*** HTTP Service installed succeeded ***"
-  else
-    error "*** HTTP Service install failed, exit now. ***"
-    exit 123
-  fi 
-  systemctl stop firewalld.service 
-  systemctl "${local_repo_auto_start}" nginx.service
-}
-
-########################
-# Install python3 
-# Arguments:
-#   None 
-# Returns:
-#   None
-#########################
-install_python_3() {
   info "*** Installing python 3 ***"
-  yum -y localinstall "${project_base_dir}"/pkg/local/python3*.rpm > /dev/null 
-}
+  yum -y -q install python3
 
-########################
-# Install requirements
-# Arguments:
-#   requirements
-# Returns:
-#   None
-#########################
-install_kubespary_pip_requirements() {
-  requirements=$1
   info "*** Installing kubespary python requirements ***"
   pip3 install --user --quiet -r "${requirements}"
 
@@ -198,137 +84,37 @@ install_kubespary_pip_requirements() {
 }
 
 ########################
-# Download rpm packages
-# Arguments:
-#   yum config url list
-# Returns:
-#   None
-#########################
-download_yum_packages() {
-  rpm_requirements=$1
-
-  set_internet_yum_repo "${donwload_yum_config_url_list}"
-
-  item_packages_dir="${project_base_dir}/pkg/local"
-  rm -rf "${item_packages_dir}" && mkdir -p "${item_packages_dir}"
-
-  for item in $(cat ${rpm_requirements} );
-  do
-    info "*** Downloading Yum ${item} packages ***"
-    yum -y remove "${item}" &> /dev/null
-    yum -y install "${item}" --downloadonly --downloaddir="${item_packages_dir}" &> /dev/null
-  done
-  createrepo "${item_packages_dir}" > /dev/null 
-
-}
-
-########################
-# get pip requirements pkgs
+# Print environment for kubespray
 # Arguments:
 #   None
 # Returns:
 #   None
 #########################
-download_pip_packages() {
-  requirements_file=$1
+print_kubespray_environment() {
+  env_file="${project_base_dir}/env.yml"
 
-  set_internet_pip_repo "${download_pip_index_url}" "${download_pip_trusted_host}"
+  echo "
+# Docker
+docker_rh_repo_base_url: \"${online_docker_rh_repo_url}\"
+docker_rh_repo_gpgkey: \"${online_docker_rh_repo_gpgkey}\"
 
-  # you should run get_yum_package first, and then run this function.
-  install_python_3
-  pip3 install -q pip2pi 
+# Kubernetes image repo
+kube_image_repo: \"${online_kube_image_repo}\"
+docker_image_repo: \"${online_docker_image_repo}\"
+quay_image_repo: \"${online_quay_image_repo}\"
 
-  info "*** Downloading Pip packages ***"
-  cd "${project_base_dir}/pkg/pypi"
-  pip2tgz path -r "${requirements_file}" > /dev/null
-  dir2pi path/ > /dev/null
-}
+# Download
+kubeadm_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubeadm\"
+kubelet_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubelet\"
+kubectl_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubectl\"
 
-########################
-# get centos iso
-# Arguments:
-#   Centos version
-# Returns:
-#   None
-#########################
-download_centos_iso() {
-  donwload_centos_iso_url=$1
+" > "${env_file}"
 
-  if ls "${project_base_dir}/pkg/base/*.iso" &> /dev/null;
-  then
-    info "*** There is a iso found, I will use it. ***"
-    use_local_image_file="true"
-  fi
-
-  if [[ -z "${use_local_image_file}" ]];
-  then
-      info "*** There is a iso found, I will use it. ***"
-  elif [[ -n "${use_local_image_file}" && "${downlaod_centos_iso_enabled}" = "true" ]];
-  then
-    info "*** Downloading CentOS iso ***"
-    wget -q -c -O "${project_base_dir}/pkg/base/centos.iso" "${donwload_centos_iso_url}"
-  else
-    error "*** Do not download CentOS iso? I didn't find a iso, exit now. ***"
-    exit 10
-  fi
-}
-
-########################
-# Check if download done
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
-check_if_download_done() {
-  if [[ ! -f "${project_base_dir}/.DOWNLOADDONE" ]];
-  then
-    warn "*** There is no offline packages, please download first. ***"
-  fi
-}
-
-########################
-# Install Function
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
-localrepo_install() {
-  am_i_root
-
-  check_if_download_done
-
-  local_yum_repo "${local_repo_home}" "${local_repo_listen_addr}" "${local_repo_listen_port}"
-  local_pip_repo "${local_repo_home}" "${local_repo_listen_addr}" "${local_repo_listen_port}"
-
-  install_python_3
-  install_http_service "${local_repo_home}" "${local_repo_listen_addr}" "${local_repo_listen_port}"
-
-  install_kubespary_pip_requirements "${project_base_dir}/requirements/pip.txt"
-  info "*** Install Done ***"
-}
-
-########################
-# Download Function
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
-localrepo_download() {
-  rm -f "${project_base_dir}/.DOWNLOADDONE"
-
-  am_i_root
-
-  can_i_connect_to_internet
-
-  download_yum_packages "${project_base_dir}/requirements/rpm.txt"
-  download_pip_packages "${project_base_dir}/requirements/pip.txt"
-
-  download_centos_iso "${donwload_centos_iso_url}"
-
-  touch "${project_base_dir}/.DOWNLOADDONE"
-  info "*** Download Done ***"
-
+  echo "
+含有一些重要环境变量的文件env.yml已经保存到${project_base_dir}/env.yml
+您可以在使用kubespray时加载它
+例如：ansible-playbook -i inventory/mycluster/inventory.ini -e @env.yml cluster.yml
+具体信息如下：  
+"
+  cat "${env_file}"
 }

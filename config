@@ -1,21 +1,29 @@
 ########################
-# Settings for download 
+# Settings for ONLINE
 #########################
-downlaod_centos_iso_enabled="true"
-donwload_centos_iso_url="https://mirrors.aliyun.com/centos-vault/7.5.1804/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso"
-download_pip_index_url="https://mirrors.aliyun.com/pypi/simple/"
-download_pip_trusted_host="mirrors.aliyun.com"
-donwload_yum_config_url_list="
-https://mirrors.aliyun.com/repo/Centos-7.repo
-http://mirrors.aliyun.com/repo/epel-7.repo
-https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-"
+
+online_centos_repo_url="http://mirrors.aliyun.com/centos/$releasever/os/$basearch/"
+online_centos_repo_gpgkey="http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7"
+
+online_epel_repo_url="http://mirrors.aliyun.com/epel/7/$basearch"
+online_epel_repo_gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7"
+
+online_docker_rh_repo_url="https://mirrors.aliyun.com/docker-ce/linux/centos/7/$basearch/stable"
+online_docker_rh_repo_gpgkey="https://mirrors.aliyun.com/docker-ce/linux/centos/gpg"
+
+online_pip_index_url="https://mirrors.aliyun.com/pypi/simple/"
+online_pip_trusted_host="mirrors.aliyun.com"
+
+online_kube_image_repo="registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers"
+online_docker_image_repo="registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io"
+online_quay_image_repo="registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/quay.io"
+
+online_kubedpdl_http_repo="http://47.57.95.108:32080"
+
 
 
 ########################
-# Settings for local install
+# Settings for OFFLINE
 #########################
-local_repo_home="/data/localrepo"
-local_repo_listen_addr="192.168.158.128"
-local_repo_listen_port="8001"
-local_repo_auto_start="disable"
+
+

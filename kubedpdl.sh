@@ -17,9 +17,9 @@ change_directory_to_project_base_dir() {
 change_directory_to_project_base_dir
 
 # Load Fuctions
-. "${project_base_dir}/lib/lib.sh"
-. "${project_base_dir}/lib/libhelp.sh"
-. "${project_base_dir}/lib/liblocalrepo.sh"
+. "${project_base_dir}/library/lib.sh"
+. "${project_base_dir}/library/libkubepdpl_online.sh"
+. "${project_base_dir}/library/libkubepdpl_offline.sh"
 
 ########################
 # Main function
@@ -31,12 +31,16 @@ change_directory_to_project_base_dir
 main() {
   command=$1
   case "${command}" in
-    "install")
-      localrepo_install
+    "online")
+      pdpl_online
       ;;
     
+    "offline")
+      pdpl_offline
+      ;;
+
     "download")
-      localrepo_download
+      download
       ;;
 
     *)
