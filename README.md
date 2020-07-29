@@ -1,5 +1,8 @@
-# kubespary 离线软件源
+# kubespary predeploy
 用于下载和部署kubespary(K8S集群部署工具)的离线软件源, 包括kubespary运行所需要的pip依赖, 和K8S安装所需要的rpm依赖和docker images. 
+设置kubespray运行时环境和K8S集群安装所需要的镜像, 支持online和offline两种模式. 
+* online模式设置国内阿里云CentOS仓库、Docker仓库、PIP仓库, 我们基于阿里云容器镜像服务提供了安装K8S集群所需要的所有镜像。
+* offline模式预先下载kubespray运行时环境依赖，可以一键设置本地的CentOS仓库、Docker仓库、PIP仓库。我们提供了一个roles用于设置本地的docker registry。
 
 ## 准备
 * 有互联网连接的centos 7.5+
