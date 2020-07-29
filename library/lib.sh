@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Load Functions
-. "${project_base_dir}/lib/liblog.sh"
+. "${project_base_dir}/library/liblog.sh"
 
 ########################
 # Am i root

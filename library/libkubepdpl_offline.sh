@@ -2,8 +2,8 @@
 
 # Load Functions
 
-. "${project_base_dir}/lib/lib.sh"
-. "${project_base_dir}/lib/liblog.sh"
+. "${project_base_dir}/library/lib.sh"
+. "${project_base_dir}/library/liblog.sh"
 . "${project_base_dir}/config"
 
 ########################
