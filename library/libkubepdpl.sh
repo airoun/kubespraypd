@@ -22,7 +22,7 @@ set_online_yum_repo() {
   repo_url=$2
   repo_gpgkey=$3
 
-  info "*** Configuring online ${repo_name} repo ***"
+  info "*** Configure online ${repo_name} repo ***"
   # for config_url in ${config_url_list};
   # do
   #   config_name=$(echo ${config_url} | awk -F "/" '{print $NF}')
@@ -52,7 +52,7 @@ set_online_pip_repo() {
   index_url=$1
   trusted_host=$2
   
-  info "*** Configuring internet pip repo ***"
+  info "*** Configure internet pip repo ***"
   cat > ~/.pip/pip.conf <<EOF
 [global]
 index-url=${index_url}
@@ -92,7 +92,9 @@ install_python3_and_ansible() {
 #########################
 print_kubespray_environment() {
   env_file="${project_base_dir}/env.yml"
+  rm -f "${env_file}"
 
+  info "*** Save kubespray evironment file to ${env_file} ***"
   echo "
 # Docker
 docker_rh_repo_base_url: \"${online_docker_rh_repo_url}\"
@@ -108,13 +110,11 @@ kubeadm_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/r
 kubelet_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubelet\"
 kubectl_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubectl\"
 
+etcd_download_url: \"http://${online_kubedpdl_http_repo}/coreos/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-{{ image_arch }}.tar.gz\"
+cni_download_url: \"http://${online_kubedpdl_http_repo}/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-{{ image_arch }}-{{ cni_version }}.tgz\"
+calicoctl_download_url: \"http://${online_kubedpdl_http_repo}/projectcalico/calicoctl/releases/download/{{ calico_ctl_version }}/calicoctl-linux-{{ image_arch }}\"
+crictl_download_url: \"https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-{{ ansible_system | lower }}-{{ image_arch }}.tar.gz\"
+
 " > "${env_file}"
 
-  echo "
-含有一些重要环境变量的文件env.yml已经保存到${project_base_dir}/env.yml
-您可以在使用kubespray时加载它
-例如：ansible-playbook -i inventory/mycluster/inventory.ini -e @env.yml cluster.yml
-具体信息如下：  
-"
-  cat "${env_file}"
 }
