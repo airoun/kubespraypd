@@ -1,0 +1,16 @@
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/library/nginx                                   1.19                  8cf1bfb43ff5        7 days ago          132MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/ingress-nginx                                             v0.34.1               6fb0739a741f        13 days ago         329MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/calico/node                                     v3.15.1               1470783b1474        3 weeks ago         262MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/calico/cni                                      v3.15.1               2858353c1d25        3 weeks ago         217MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/calico/kube-controllers                         v3.15.1               8ed9dbffe350        3 weeks ago         53.1MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/kube-proxy                              v1.18.5               a1daed4e2b60        4 weeks ago         117MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/kube-apiserver                          v1.18.5               08ca24f16874        4 weeks ago         173MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/kube-controller-manager                 v1.18.5               8d69eaf196dc        4 weeks ago         162MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/kube-scheduler                          v1.18.5               39d887c6621d        4 weeks ago         95.3MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/kubernetesui/dashboard-amd64                    v2.0.2                05126876084d        5 weeks ago         225MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/cluster-proportional-autoscaler-amd64   1.8.1                 17ffd2ee7ad8        6 weeks ago         40.7MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/kubernetesui/metrics-scraper                    v1.0.5                2cd72547f23f        7 weeks ago         36.7MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/k8s-dns-node-cache                      1.15.13               3f7a09f7cade        2 months ago        107MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-containers/pause                                   3.2                   80d28bedfe5d        5 months ago        683kB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io/coredns/coredns                                 1.6.7                 67da37a9a360        6 months ago        43.8MB
+registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/quay.io/coreos/etcd                                       v3.4.3                a0b920cf970d        9 months ago        83.6MB
