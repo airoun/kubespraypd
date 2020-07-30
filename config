@@ -18,7 +18,7 @@ online_kube_image_repo="registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/google-c
 online_docker_image_repo="registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/docker.io"
 online_quay_image_repo="registry.cn-hangzhou.aliyuncs.com/cn_kubernetes/quay.io"
 
-online_kubedpdl_http_repo="http://47.57.95.108:32080"
+online_kubedpdl_http_repo="47.57.95.108:32080"
 
 
 
