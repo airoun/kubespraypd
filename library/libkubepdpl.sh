@@ -97,7 +97,7 @@ template_env_file_for_kubespray() {
   export online_docker_rh_repo_url
   export online_docker_rh_repo_gpgkey
   export online_kube_image_repo
-  export online_docker_image_repo}
+  export online_docker_image_repo
   export online_quay_image_repo
   export online_kubedpdl_http_repo
 
@@ -106,7 +106,7 @@ template_env_file_for_kubespray() {
   export -n online_docker_rh_repo_url
   export -n online_docker_rh_repo_gpgkey
   export -n online_kube_image_repo
-  export -n online_docker_image_repo}
+  export -n online_docker_image_repo
   export -n online_quay_image_repo
   export -n online_kubedpdl_http_repo
 

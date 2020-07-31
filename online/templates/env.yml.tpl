@@ -29,9 +29,30 @@ docker_cert_dir: "/etc/docker/pki"
 docker_insecure_registries:
   - registry.arksec.io:32443
 
-# K8S Master 
+# K8S Master
+kube_version: v1.18.5
 kube_apiserver_node_port_range: "30000-33000"
-enable_nodelocaldns: "true"
+kube_api_anonymous_auth: true
+kube_apiserver_insecure_port: 0
 
 # network plugin
 kube_network_plugin: "calico"
+kube_network_plugin_multus: false
+kube_service_addresses: 10.233.0.0/18
+kube_pods_subnet: 10.233.64.0/18
+kube_network_node_prefix: 24
+
+# kube proxy
+kube_proxy_mode: ipvs
+kube_proxy_strict_arp: false
+
+# dns
+cluster_name: cluster.local
+dns_mode: coredns
+enable_nodelocaldns: true
+nodelocaldns_ip: 169.254.25.10
+nodelocaldns_health_port: 9254
+enable_coredns_k8s_external: false
+coredns_k8s_external_zone: k8s_external.local
+enable_coredns_k8s_endpoint_pod_names: false
+resolvconf_mode: docker_dns
