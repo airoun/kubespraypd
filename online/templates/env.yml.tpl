@@ -2,6 +2,9 @@
 # Download
 online_kubedpdl_http_repo: "${online_kubedpdl_http_repo}"
 
+extras_rh_repo_base_url: "${online_centos_extra_repo_url}"
+extras_rh_repo_gpgkey: "$online_centos_extra_repo_gpgkey}"
+
 docker_rh_repo_base_url: "${online_docker_rh_repo_url}"
 docker_rh_repo_gpgkey: "${online_docker_rh_repo_gpgkey}"
 
