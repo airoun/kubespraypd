@@ -5,7 +5,7 @@
 online_centos_repo_url="http://mirrors.aliyun.com/centos/\$releasever/os/\$basearch/"
 online_centos_repo_gpgkey="http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7"
 
-online_centos_extra_repo_url="http://mirrors.aliyun.com/centos/\$releasever/extras/$basearch/"
+online_centos_extra_repo_url="http://mirrors.aliyun.com/centos/\$releasever/extras/\$basearch/"
 online_centos_extra_repo_gpgkey="http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7"
 
 online_epel_repo_url="http://mirrors.aliyun.com/epel/7/\$basearch"
