@@ -90,30 +90,24 @@ install_python3_and_ansible() {
 # Returns:
 #   None
 #########################
-print_kubespray_environment() {
+template_env_file_for_kubespray() {
   env_file="${project_base_dir}/env.yml"
-  rm -f "${env_file}"
+  template_env_file="${project_base_dir}/online/templates/env.yml.tpl"
+  
+  export "${online_docker_rh_repo_url}"
+  export "${online_docker_rh_repo_gpgkey}"
+  export "${online_kube_image_repo}"
+  export "${online_docker_image_repo}"
+  export "${online_quay_image_repo}"
+  export "${online_kubedpdl_http_repo}"
 
-  info "*** Save kubespray evironment file to ${env_file} ***"
-  echo "
-# Docker
-docker_rh_repo_base_url: \"${online_docker_rh_repo_url}\"
-docker_rh_repo_gpgkey: \"${online_docker_rh_repo_gpgkey}\"
+  envsubst < "${template_env_file}" > "${env_file}"
 
-# Image repo
-kube_image_repo: \"${online_kube_image_repo}\"
-docker_image_repo: \"${online_docker_image_repo}\"
-quay_image_repo: \"${online_quay_image_repo}\"
-
-# Download
-kubeadm_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubeadm\"
-kubelet_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubelet\"
-kubectl_download_url: \"http://${online_kubedpdl_http_repo}/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubectl\"
-etcd_download_url: \"http://${online_kubedpdl_http_repo}/coreos/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-{{ image_arch }}.tar.gz\"
-cni_download_url: \"http://${online_kubedpdl_http_repo}/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-{{ image_arch }}-{{ cni_version }}.tgz\"
-calicoctl_download_url: \"http://${online_kubedpdl_http_repo}/projectcalico/calicoctl/releases/download/{{ calico_ctl_version }}/calicoctl-linux-{{ image_arch }}\"
-crictl_download_url: \"https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-{{ ansible_system | lower }}-{{ image_arch }}.tar.gz\"
-
-" > "${env_file}"
+  export -n "${online_docker_rh_repo_url}"
+  export -n "${online_docker_rh_repo_gpgkey}"
+  export -n "${online_kube_image_repo}"
+  export -n "${online_docker_image_repo}"
+  export -n "${online_quay_image_repo}"
+  export -n "${online_kubedpdl_http_repo}"
 
 }

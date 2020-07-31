@@ -25,5 +25,5 @@ pdpl_online() {
   set_online_pip_repo "${online_pip_index_url}" "${online_pip_trusted_host}"
 
   install_python3_and_ansible
-  print_kubespray_environment
+  template_env_file_for_kubespray
 }
