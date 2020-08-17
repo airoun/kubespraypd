@@ -94,6 +94,8 @@ template_env_file_for_kubespray() {
   env_file="${project_base_dir}/env.yml"
   template_env_file="${project_base_dir}/online/templates/env.yml.tpl"
   
+  export online_centos_extra_repo_url
+  export online_centos_extra_repo_gpgkey
   export online_centos_repo_url
   export online_centos_repo_gpgkey
   export online_docker_rh_repo_url
@@ -113,4 +115,6 @@ template_env_file_for_kubespray() {
   export -n online_kubedpdl_http_repo
   export -n online_centos_repo_url
   export -n online_centos_repo_gpgkey
+  export -n online_centos_extra_repo_url
+  export -n online_centos_extra_repo_gpgkey
 }

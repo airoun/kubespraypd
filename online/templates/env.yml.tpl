@@ -3,7 +3,7 @@
 online_kubedpdl_http_repo: "${online_kubedpdl_http_repo}"
 
 extras_rh_repo_base_url: "${online_centos_extra_repo_url}"
-extras_rh_repo_gpgkey: "$online_centos_extra_repo_gpgkey}"
+extras_rh_repo_gpgkey: "${online_centos_extra_repo_gpgkey}"
 
 docker_rh_repo_base_url: "${online_docker_rh_repo_url}"
 docker_rh_repo_gpgkey: "${online_docker_rh_repo_gpgkey}"
@@ -44,6 +44,9 @@ kube_network_plugin_multus: false
 kube_service_addresses: 10.233.0.0/18
 kube_pods_subnet: 10.233.64.0/18
 kube_network_node_prefix: 24
+calico_mtu: 1480
+calico_ipip_mode: 'Always'
+calico_vxlan_mode: 'Never'
 
 # kube proxy
 kube_proxy_mode: ipvs
