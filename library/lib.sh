@@ -48,7 +48,7 @@ disable_selinux() {
 backup_old_yum_repos() {
   info "*** Backup old yum repos ***"
   mkdir -p /etc/yum.repos.d/bak
-  
+
   if ls /etc/yum.repos.d/*.repo &> /dev/null;
   then
     mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak
@@ -168,7 +168,7 @@ check_docker_if_is_existed() {
 }
 
 # download
-dl_kubespary_code() {
+dl_kubespray_code() {
 
   downloaddir="$1"
 
@@ -179,7 +179,7 @@ dl_kubespary_code() {
   git clone https://github.com/kubernetes-sigs/kubespray.git &> /dev/null
 }
 
-dl_kubespary_files() {
+dl_kubespray_files() {
 
   downloaddir="$1"
 
