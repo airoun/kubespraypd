@@ -17,6 +17,7 @@
 pdpl_online() {
 
   am_i_root
+  can_i_connect_to_internet
   backup_old_yum_repos
   configure_a_yum_repo "CentOS-Base" "${online_centos_repo_url}"
   configure_a_yum_repo "CentOS-Extra" "${online_centos_extra_repo_url}"
@@ -26,6 +27,6 @@ pdpl_online() {
   backup_old_pip_repos
   configure_a_pip_repo "${online_pip_index_url}" "${online_pip_trusted_host}"
 
-  install_python3_and_ansible
+  check_ansible_if_is_existed
   template_env_file_for_kubespray
 }

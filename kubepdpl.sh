@@ -40,7 +40,7 @@ main() {
       ;;
 
     "download")
-      download
+      pdpl_download
       ;;
 
     *)

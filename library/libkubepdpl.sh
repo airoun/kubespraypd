@@ -4,7 +4,6 @@
 
 . "${project_base_dir}/library/lib.sh"
 . "${project_base_dir}/library/liblog.sh"
-. "${project_base_dir}/config"
 
 # configure repos
 configure_a_yum_repository() {
@@ -57,16 +56,6 @@ check_cmd_if_is_existed() {
   fi
 }
 
-install_ansible() {
-
-  requirements="$1"
-
-  check_cmd_if_is_existed "python3"
-  info "*** Installing kubespary python requirements ***"
-  pip3 install --user --quiet -r "${requirements}"
-  echo "export PATH=/root/.local/bin:$PATH" >> ~/.bashrc
-}
-
 check_ansible_if_is_existed() {
 
   cmd="ansible"
@@ -75,7 +64,9 @@ check_ansible_if_is_existed() {
     info "*** ${cmd} is already installed, nothing to do. ***"
   else
     info "*** ${cmd} is not installed, install it now. ***"
-    install_python3_and_ansible
+    check_cmd_if_is_existed "python3"
+    pip3 install --user --quiet -r "${project_base_dir}/files/python_site_packages_to_download"
+    echo "export PATH=/root/.local/bin:$PATH" >> ~/.bashrc
   fi
 }
 
@@ -100,7 +91,7 @@ dl_kubespary_code() {
 
   info "*** Downloading kubespray code ***"
   cd "${downloaddir}" && rm -fr kubespary/
-  git clone https://github.com/kubernetes-sigs/kubespray.git
+  git clone https://github.com/kubernetes-sigs/kubespray.git &> /dev/null
 }
 
 dl_kubespary_files() {
@@ -110,8 +101,8 @@ dl_kubespary_files() {
   check_ansible_if_is_existed
 
   info "*** Downloading kubespary files"
-  cd "${downloaddir}/files/kubespary" || return
-  ansible-playbook -i inventory/sample/inventory.ini cluster.yml --tags download
+  cd "${downloaddir}/kubespary" || return
+  ansible-playbook -i inventory/sample/inventory.ini cluster.yml --tags download &> /dev/null
 }
 
 dl_centos_isos() {
@@ -121,6 +112,7 @@ dl_centos_isos() {
 
   check_cmd_if_is_existed "wget"
 
+  rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
   while IFS= read -r item; do
     info "*** Downloading ${item} isos ***"
     #wget -q -c -O "${project_base_dir}/files/centos.iso" "${centos_iso_url}"
@@ -133,6 +125,7 @@ dl_rpm_packages() {
   downloaddir="$1"
   requirements="$2"
 
+  rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
   while IFS= read -r item; do
     info "*** Downloading ${item} yum packages ***"
     yum -y remove "${item}" &> /dev/null
@@ -144,7 +137,7 @@ dl_rpm_packages() {
 
 dl_pip_packages() {
 
-  dest_path="$1"
+  downloaddir="$1"
   requirements="$2"
 
   check_cmd_if_is_existed "python3"
@@ -152,8 +145,9 @@ dl_pip_packages() {
   info "*** Installing pip2pi ***"
   pip3 install -q pip2pi
 
+  rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
   info "*** Downloading pip packages ***"
-  cd "${dest_path}" || return
+  cd "${downloaddir}" || return
   pip2tgz path -r "${requirements}" > /dev/null
   dir2pi path/ > /dev/null
 }
@@ -183,6 +177,8 @@ setup_http_repo_server() {
   export -n listen_port
   export -n data_root
 
+  systemctl stop firewalld
+
 }
 
 setup_docker_registry_server() {
@@ -195,7 +191,7 @@ setup_docker_registry_server() {
 
   docker run -d -v "${data_root}":/var/lib/registry \
   -p 5000:5000 --restart=Always \
-  --name registry registry:latest
+  --name registry registry:2
 
 }
 
