@@ -18,8 +18,8 @@ change_directory_to_project_base_dir
 
 # Load Fuctions
 . "${project_base_dir}/library/lib.sh"
-. "${project_base_dir}/library/libkubepdpl_online.sh"
-. "${project_base_dir}/library/libkubepdpl_offline.sh"
+. "${project_base_dir}/library/libkubepd_online.sh"
+. "${project_base_dir}/library/libkubepd_offline.sh"
 
 ########################
 # Main function
@@ -32,15 +32,15 @@ main() {
   command=$1
   case "${command}" in
     "online")
-      pdpl_online
+      kubespray_predeploy_online
       ;;
     
     "offline")
-      pdpl_offline
+      kubespray_predeploy_offline
       ;;
 
     "download")
-      pdpl_download
+      kubespray_predeploy_download
       ;;
 
     *)
