@@ -10,16 +10,14 @@ set -e
 #   None
 #########################
 change_directory_to_project_base_dir() {
-  project_base_dir=$(dirname $(readlink -f $0)
+  project_base_dir=$(dirname $(readlink -f $0))
   export project_base_dir="${project_base_dir}" && cd "${project_base_dir}"
 }
 
 change_directory_to_project_base_dir
 
 # Load Fuctions
-. "${project_base_dir}/library/lib.sh"
-. "${project_base_dir}/library/libkubepd_online.sh"
-. "${project_base_dir}/library/libkubepd_offline.sh"
+. "${project_base_dir}/library/libkubepd.sh"
 
 ########################
 # Main function

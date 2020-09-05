@@ -90,27 +90,6 @@ can_i_connect_to_internet() {
   fi 
 }
 
-
-########################
-# print help msg
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
-print_help_message() {
-
-  echo "
-使用kubepdpl.sh初始化kubespray controller运行环境和获取k8s镜像
-./kubepdpl.sh {COMMAND}
-
-COMMANDS:
-  online        在有互联网的机器上部署kubespray controller
-  offline       在没有互联网的机器上部署kubespray controller
-  download      预下载所需软件包
-  "
-}
-
 # configure repos
 configure_a_yum_repository() {
 
