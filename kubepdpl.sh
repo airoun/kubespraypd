@@ -10,7 +10,7 @@ set -e
 #   None
 #########################
 change_directory_to_project_base_dir() {
-  project_base_dir="$(dirname $(readlink -f $0))"
+  project_base_dir=$(dirname $(readlink -f $0)
   export project_base_dir="${project_base_dir}" && cd "${project_base_dir}"
 }
 

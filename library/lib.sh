@@ -69,7 +69,7 @@ backup_old_pip_repos() {
   info "*** Backup old pip config ***"
   if [[ -f ~/.pip/pip.conf ]];
   then
-    mv ~/.pip/pip.conf ~/.pip/pip.conf.bak.$(date "+%F_%R:%S")
+    mv ~/.pip/pip.conf ~/.pip/pip.conf.bak."$(date "+%F_%R:%S")"
   fi
 }
 

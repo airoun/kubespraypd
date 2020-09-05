@@ -2,7 +2,7 @@
 #   * Official English Documentation: http://nginx.org/en/docs/
 #   * Official Russian Documentation: http://nginx.org/ru/docs/
 
-user nginx;
+user root;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
 pid /run/nginx.pid;
@@ -36,10 +36,10 @@ http {
     include /etc/nginx/conf.d/*.conf;
 
     server {
-        listen       ${local_repo_listen_port} default_server;
+        listen       ${listen_host}:${listen_port} default_server;
         listen       [::]:${local_repo_listen_port} default_server;
         server_name  _;
-        root         ${local_repo_home};
+        root         ${data_root};
 
         # Load configuration files for the default server block.
         include /etc/nginx/default.d/*.conf;
