@@ -3,13 +3,6 @@
 # Load Functions
 . "${project_base_dir}/library/liblog.sh"
 
-########################
-# Am i root
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
 am_i_root() {
   if [[ $(id -u) -eq 0 ]];
   then
@@ -20,33 +13,19 @@ am_i_root() {
   fi
 }
 
-########################
-# Disable SELinux
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
 disable_selinux() {
   if [[ ! "$(sestatus | grep "SELinux status:" | awk '{print $3}')" = "disabled" ]];
   then
-    info "*** Check SELinux is not disabled, disable it now. ***"
+    info "*** selinux is not disabled, disable it now. ***"
     sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
     setenforce 0
   else
-    info "*** Check SELinux is disabled, it's OK. ***"
+    info "*** selinux is already disabled, nothing to do. ***"
   fi
 }
 
-########################
-# Backup old yum repos
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
 backup_old_yum_repos() {
-  info "*** Backup old yum repos ***"
+  info "*** backup old yum repos ***"
   mkdir -p /etc/yum.repos.d/bak
 
   if ls /etc/yum.repos.d/*.repo &> /dev/null;
@@ -57,16 +36,9 @@ backup_old_yum_repos() {
   rm -fr /var/cache/yum 
 }
 
-########################
-# Backup old pip repos
-# Arguments:
-#   None
-# Returns:
-#   None
-#########################
 backup_old_pip_repos() {
   mkdir -p ~/.pip/
-  info "*** Backup old pip config ***"
+  info "*** backup old pip config ***"
   if [[ -f ~/.pip/pip.conf ]];
   then
     mv ~/.pip/pip.conf ~/.pip/pip.conf.bak."$(date "+%F_%R:%S")"
@@ -83,20 +55,20 @@ backup_old_pip_repos() {
 can_i_connect_to_internet() {
   if ping -c 1 www.baidu.com > /dev/null;
   then
-    info "*** Connected to the internet ***"
+    info "*** connected to the internet ***"
   else
-    error "*** Cannot connect to the internet, please check your networking, exit now. ***"
+    error "*** cannot connect to the internet, exit now. ***"
     exit 2
   fi 
 }
 
 # configure repos
-configure_a_yum_repository() {
+configure_a_yum_repo() {
 
   repo_name="$1"
   repo_url="$2"
 
-  info "*** Configure ${repo_name} repo ***"
+  info "*** configure ${repo_name} repo ***"
   # for config_url in ${config_url_list};
   # do
   #   config_name=$(echo ${config_url} | awk -F "/" '{print $NF}')
@@ -119,7 +91,7 @@ configure_a_pip_repo() {
   index_url="$1"
   trusted_host="$2"
 
-  info "*** Configure internet pip repo ***"
+  info "*** configure internet pip repo ***"
   cat > ~/.pip/pip.conf <<EOF
 [global]
 index-url=${index_url}
@@ -133,7 +105,7 @@ check_cmd_if_is_existed() {
 
   cmd="$1"
 
-  if command -v "${cmd}"; then
+  if command -v "${cmd}" &> /dev/null; then
     info "*** ${cmd} is already installed, nothing to do. ***"
   else
     info "*** ${cmd} is not installed, install it now. ***"
@@ -145,7 +117,7 @@ check_ansible_if_is_existed() {
 
   cmd="ansible"
 
-  if command -v "${cmd}"; then
+  if ansible &> /dev/null; then
     info "*** ${cmd} is already installed, nothing to do. ***"
   else
     info "*** ${cmd} is not installed, install it now. ***"
@@ -159,11 +131,13 @@ check_docker_if_is_existed() {
 
   cmd="docker"
 
-  if command -v "${cmd}"; then
+  if docker info &> /dev/null; then
     info "*** ${cmd} is already installed, nothing to do. ***"
   else
     info "*** ${cmd} is not installed, install it now. ***"
     yum -y -q install docker-ce
+    systemctl start docker.service
+    #systemctl enable docker.service
   fi
 }
 
@@ -174,20 +148,39 @@ dl_kubespray_code() {
 
   check_cmd_if_is_existed "git"
 
-  info "*** Downloading kubespray code ***"
-  cd "${downloaddir}" && rm -fr kubespary/
+  info "*** downloading kubespray code ***"
+  cd "${downloaddir}" && rm -fr kubespray/
   git clone https://github.com/kubernetes-sigs/kubespray.git &> /dev/null
+}
+
+init_kubespray_inventory() {
+
+  hostname="$1"
+  ipaddress="$2"
+  src_file="$3"
+  dst_file="$4"
+
+  export  hostname
+  export  ipaddress
+
+  envsubst < "${src_file}" > "${dst_file}"
+
+  export -n hostname
+  export -n ipaddress
+
 }
 
 dl_kubespray_files() {
 
-  downloaddir="$1"
+  kubespraydir="$1"
+  downloaddir="$2"
 
   check_ansible_if_is_existed
+  check_docker_if_is_existed
 
-  info "*** Downloading kubespary files"
-  cd "${downloaddir}/kubespary" || return
-  ansible-playbook -i inventory/sample/inventory.ini cluster.yml --tags download &> /dev/null
+  info "*** downloading kubespary files ***"
+  cd "${kubespraydir}" || return
+  ansible-playbook -i inventory/sample/inventory.ini cluster.yml -e local_release_dir="${downloaddir}" --tags download
 }
 
 dl_centos_isos() {
@@ -200,7 +193,6 @@ dl_centos_isos() {
   rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
   while IFS= read -r item; do
     info "*** Downloading ${item} isos ***"
-    #wget -q -c -O "${project_base_dir}/files/centos.iso" "${centos_iso_url}"
     cd "${downloaddir}" && wget -q -c  "${item}"
   done < "${requirements}"
 }
@@ -212,11 +204,13 @@ dl_rpm_packages() {
 
   rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
   while IFS= read -r item; do
-    info "*** Downloading ${item} yum packages ***"
+    info "*** uninstalling ${item}, for download ${item} ***"
     yum -y remove "${item}" &> /dev/null
+    info "*** downloading ${item} yum packages ***"
     yum -y install "${item}" --downloadonly --downloaddir="${downloaddir}" &> /dev/null
   done < "${requirements}"
 
+  check_cmd_if_is_existed "createrepo"
   createrepo "${downloaddir}" > /dev/null
 }
 
@@ -227,11 +221,11 @@ dl_pip_packages() {
 
   check_cmd_if_is_existed "python3"
 
-  info "*** Installing pip2pi ***"
+  info "*** installing pip2pi ***"
   pip3 install -q pip2pi
 
   rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
-  info "*** Downloading pip packages ***"
+  info "*** downloading pip packages ***"
   cd "${downloaddir}" || return
   pip2tgz path -r "${requirements}" > /dev/null
   dir2pi path/ > /dev/null
@@ -285,9 +279,9 @@ template_env_file_for_kubespray() {
   mode="$1"
   env_file="${project_base_dir}/env.yml"
   if [[ "X${mode}" == "Xonline" ]]; then
-    template_env_file="${project_base_dir}}/templates/online/env.yml.tpl"
+    template_env_file="${project_base_dir}/templates/online/env.yml.tpl"
   elif [ "X${mode}" == "Xoffline" ]; then
-    template_env_file="${project_base_dir}}/templates/offline/env.yml.tpl"
+    template_env_file="${project_base_dir}/templates/offline/env.yml.tpl"
   fi
 
   export online_centos_extra_repo_url
@@ -315,3 +309,6 @@ template_env_file_for_kubespray() {
   export -n online_centos_extra_repo_gpgkey
 }
 
+echo_done() {
+  info "*** congratulations, it's all done. ***"
+}

@@ -6,6 +6,8 @@
 ########################
 # Settings for DOWNLOAD
 ########################
+download_server_hostname=hk-01
+download_server_ipaddress=192.168.101.12
 download_centos_iso_enable=true
 
 ########################
