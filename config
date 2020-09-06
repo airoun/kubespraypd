@@ -8,18 +8,18 @@
 ########################
 download_server_hostname=hk-01
 download_server_ipaddress=192.168.101.12
-download_centos_yes_or_not=yes
+download_centos_isos_enable=false
 
 ########################
 # Settings for OFFLINE
 ########################
 offline_server_host=192.168.101.12
-offline_server_http_repo_port=8001
+offline_server_http_repo_port=32080
 offline_server_docker_registry_port=5000
 offline_server_docker_registry_data=/data/registry
 offline_server_docker_data_root=/data/var/lib/docker
 external_centos_base_repo_enable=false
-external_centos_base_repo_url="http://172.16.32.14:32014/centos/Packages"
+external_centos_base_repo_url="http://192.168.101.12:8001/centos/Packages"
 
 ########################
 # Settings for ONLINE

@@ -55,6 +55,15 @@ can_i_connect_to_internet() {
   fi 
 }
 
+docker_remove_all_images() {
+
+  local dataRoot="$1"
+
+  info "*** removing old docker images ***"
+  rm -rf "${dataRoot}"
+
+}
+
 # configure repos
 configure_a_yum_repo() {
 
@@ -178,7 +187,7 @@ dl_centos_isos() {
 
   rm -rf "${downloaddir}" && mkdir -p "${downloaddir}"
   while IFS= read -r item; do
-    info "*** Downloading ${item} isos ***"
+    info "*** downloading ${item} isos ***"
     cd "${downloaddir}" && wget -q -c  "${item}"
   done < "${requirements}"
 }
@@ -223,7 +232,7 @@ dl_docker_registry() {
 
   mkdir -p "${downloaddir}"
 
-  info "*** downloading docker registry ***"
+  info "*** downloading docker registry image ***"
   docker pull registry:2 &> /dev/null
 
   cd "${downloaddir}" || return
@@ -296,8 +305,9 @@ setup_docker_registry_server() {
   check_docker_if_is_existed
 
   info "*** removing old docker registry ***"
-  if docker ps | grep "registry ";then
-    docker rm -f registry
+  if docker ps | grep "registry:2";then
+    docker rm -f registry &> /dev/null
+    rm -rf "${registry_data}"
   fi
 
   info "*** installing docker registry ***"
@@ -356,6 +366,51 @@ docker_load_and_push() {
     info "*** pushing ${new_docker_image}"
     docker push "${new_docker_image}" &> /dev/null
   done < "${docker_images}"
+}
+
+modify_directory_name() {
+
+  local downloaddir="$1"
+
+  local kubespray_envfile="${downloaddir}/kubespray/roles/download/defaults/main.yml"
+  local release_dir="${downloaddir}/release"
+  local image_arch="amd64"
+
+  # etcd
+  etcd_version=$(grep "^etcd_version" "${kubespray_envfile}" | awk '{print $2}' | sed $'s/\"//g' )
+
+  # cni
+  cni_version=$(grep "^cni_version" "${kubespray_envfile}" | awk '{print $2}' | sed $'s/\"//g')
+  cni_dst_dir="${downloaddir}/containernetworking/plugins/releases/download/${cni_version}"
+  cni_src_filename="cni-plugins-linux-${image_arch}-${cni_version}.tgz"
+  cni_dst_filename="cni-plugins-linux-${image_arch}-${cni_version}.tgz"
+
+  info "*** modify cni plugins directory ***"
+  mkdir -p "${cni_dst_dir}"
+  /bin/cp "${release_dir}/${cni_src_filename}" "${cni_dst_dir}/${cni_dst_filename}"
+
+  # calico
+  calico_ctl_version=$(grep "^calico_version" ${kubespray_envfile} | awk '{print $2}' | sed $'s/\"//g')
+  calico_ctl_dst_dir="${downloaddir}/projectcalico/calicoctl/releases/download/${calico_ctl_version}"
+  calico_ctl_src_filename="calicoctl"
+  calico_ctl_dst_filename="calicoctl-linux-${image_arch}"
+
+  info "*** modify calicoctl directory ***"
+  mkdir -p "${calico_ctl_dst_dir}"
+  /bin/cp "${release_dir}/${calico_ctl_src_filename}" "${calico_ctl_dst_dir}/${calico_ctl_dst_filename}"
+
+  # kubectl
+  # kubelet
+  # kubeadm
+  kube_version=$(grep "^kube_version" ${kubespray_envfile} | awk '{print $2}' )
+  kube_dst_dir="${downloaddir}/kubernetes-release/release/${kube_version}/bin/linux/${image_arch}"
+
+  info "*** modify kube binaries directory ***"
+  mkdir -p "${kube_dst_dir}"
+  /bin/cp "${release_dir}/kubeadm-${kube_version}-${image_arch}" "${kube_dst_dir}/kubeadm"
+  /bin/cp "${release_dir}/kubectl-${kube_version}-${image_arch}" "${kube_dst_dir}/kubectl"
+  /bin/cp "${release_dir}/kubelet-${kube_version}-${image_arch}" "${kube_dst_dir}/kubelet"
+
 }
 
 # template environment file for kubespray

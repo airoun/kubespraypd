@@ -33,7 +33,7 @@ main() {
       kubespray_predeploy_online
       ;;
     
-    "offline")
+    "setup")
       kubespray_predeploy_offline
       ;;
 

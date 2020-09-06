@@ -29,7 +29,7 @@ kubespray_predeploy_download() {
   configure_a_pip_repo \
     "${online_pip_index_url}" "${online_pip_trusted_host}"
 
-  if [[ "${download_centos_yes_or_not}X" == "yesX" ]];then
+  if [[ ${download_centos_isos_enable} == "true" ]];then
     dl_centos_isos \
       "${downloaddir}/isos" "${requirements}/isos_to_download"
   fi
@@ -48,6 +48,8 @@ kubespray_predeploy_download() {
     "${templatedir}/inventory.ini.tpl" \
     "${downloaddir}/kubespray/inventory/sample/inventory.ini"
 
+  docker_remove_all_images "${offline_server_docker_data_root}"
+
   dl_kubespray_files \
     "${downloaddir}/kubespray" "${downloaddir}/release"
 
@@ -56,6 +58,9 @@ kubespray_predeploy_download() {
 
   docker_save_images \
     "${downloaddir}/docker-images" "${requirements}/images_to_push"
+
+  modify_directory_name \
+    "${downloaddir}"
 
   echo_done
 }
@@ -75,7 +80,15 @@ kubespray_predeploy_offline() {
 
   backup_old_yum_repos
   configure_a_yum_repo \
-    "kubespraypd" "http://${offline_server_host}:${offline_server_http_repo_port}/rpms"
+    "kubespraypd" "http://${http_repo}/rpms"
+
+  if [[ "${external_centos_base_repo_enable}" == "true" ]]; then
+    configure_a_yum_repo \
+      "CentOS-External" "${external_centos_base_repo_url}"
+  else
+    configure_a_yum_repo \
+      "CentOS-Base" "http://${http_repo}/centos"
+  fi
 
   backup_old_pip_repos
   configure_a_pip_repo \
@@ -87,6 +100,9 @@ kubespray_predeploy_offline() {
   setup_docker_registry_server \
     "${offline_server_host}" "${offline_server_docker_registry_port}" "${offline_server_docker_registry_data}"
 
+  docker_load_and_push \
+    "${downloaddir}/docker-images" "${requirements}/images_to_push" "${docker_registry}"
+
   check_ansible_if_is_existed
 
   template_env_file_for_kubespray \
@@ -95,7 +111,7 @@ kubespray_predeploy_offline() {
     "${http_repo}/rpms" \
     "${http_repo}/extra" \
     "${docker_registry}/k8s.gcr.io" \
-    "${docker_registry}/docker.io" \
+    "${docker_registry}" \
     "${docker_registry}/quay.io" \
     "${project_base_dir}/templates/env.yml.tpl" \
     "${project_base_dir}/downloads/kubespray/env.yml"
@@ -125,12 +141,14 @@ kubespray_predeploy_online() {
 print_help_message() {
 
   echo "
-使用kubepdpl.sh初始化kubespray controller运行环境和获取k8s镜像
-./kubepdpl.sh {COMMAND}
+./kubespraypd {COMMAND}
 
 COMMANDS:
-  online        在有互联网的机器上部署kubespray controller
-  offline       在没有互联网的机器上部署kubespray controller
-  download      预下载所需软件包
+
+  setup         设置私有环境软件源和镜像源
+
+  download      下载安装K8S所需的软件包
+
+  online        使用互联网上的软件源和镜像源
   "
 }
