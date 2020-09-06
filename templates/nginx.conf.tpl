@@ -37,12 +37,12 @@ http {
 
     server {
         listen       ${listen_host}:${listen_port} default_server;
-        listen       [::]:${local_repo_listen_port} default_server;
+        # listen       [::]:${listen_port} default_server;
         server_name  _;
         root         ${data_root};
 
         # Load configuration files for the default server block.
-        include /etc/nginx/default.d/*.conf;
+        # include /etc/nginx/default.d/*.conf;
 
         location / {
              autoindex on;
