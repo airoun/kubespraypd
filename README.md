@@ -38,7 +38,7 @@ tar cvf kubespraypd_offline.tar kubespraypd/
 tar xvf kubespraypd_offline.tar
 cd kubespraypd/ 
 ```
-修改配置文件`config`，下载机需要自己对自己做免密登陆。
+修改配置文件`config`，设置ansible controller的主机信息和数据存放位置。
 ```Shellsession
 offline_server_host=192.168.101.12    # ansible controller的ip
 offline_server_http_repo_port=32080    # http repo监听端口
