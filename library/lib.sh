@@ -239,6 +239,17 @@ dl_docker_registry() {
   docker save registry:2 -o registry.tar &> /dev/null
 }
 
+load_docker_registry() {
+
+  local downloaddir="$1"
+
+  check_docker_if_is_existed
+
+  info "*** loading docker registry image ***"
+  cd "${downloaddir}" || return
+  docker load -i registry.tar &> /dev/null
+}
+
 # setup services
 setup_http_repo_server() {
 
@@ -316,7 +327,7 @@ setup_docker_registry_server() {
     -v "${registry_data}":/var/lib/registry \
     -p 5000:5000  \
     --name registry \
-    registry:2;
+    registry:2 &> /dev/null;
   then
     info "*** docker registry has been installed ***"
   else
@@ -344,6 +355,12 @@ docker_save_images() {
   done < "${docker_images}"
 }
 
+remove_docker_daemonjson() {
+  info "*** removeing docker dameon json configuration ***"
+  systemctl stop docker &> /dev/null
+  rm -rf /etc/docker/daemon.json
+}
+
 docker_load_and_push() {
 
   local downloaddir="$1"
@@ -360,12 +377,19 @@ docker_load_and_push() {
   done
 
   while IFS= read -r docker_image; do
-    new_docker_image="${new_registry_name}/${docker_image}"
+    if [[ "${docker_image}" =~ "nginx" ]]; then
+      new_docker_image="${new_registry_name}/library/${docker_image}"
+    else
+      new_docker_image="${new_registry_name}/${docker_image}"
+    fi
+
     info "*** docker tag ${docker_image} as ${new_docker_image} ***"
     docker tag "${docker_image}" "${new_docker_image}" &> /dev/null
     info "*** pushing ${new_docker_image}"
     docker push "${new_docker_image}" &> /dev/null
   done < "${docker_images}"
+
+  remove_docker_daemonjson
 }
 
 modify_directory_name() {

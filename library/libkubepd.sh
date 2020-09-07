@@ -73,22 +73,22 @@ kubespray_predeploy_offline() {
   local http_repo="${offline_server_host}:${offline_server_http_repo_port}"
   local docker_registry=""${offline_server_host}:${offline_server_docker_registry_port}""
 
-  setup_http_repo_server \
-    "${offline_server_host}" "${offline_server_http_repo_port}" \
-    "${downloaddir}" "${downloaddir}/rpms" \
-    "${templatedir}/nginx.conf.tpl" "/etc/nginx/nginx.conf"
-
   backup_old_yum_repos
   configure_a_yum_repo \
-    "kubespraypd" "http://${http_repo}/rpms"
+    "kubespraypd" "file://${downloaddir}/rpms"
 
   if [[ "${external_centos_base_repo_enable}" == "true" ]]; then
     configure_a_yum_repo \
       "CentOS-External" "${external_centos_base_repo_url}"
   else
     configure_a_yum_repo \
-      "CentOS-Base" "http://${http_repo}/centos"
+      "CentOS-Base" "file://${downloaddir}/centos"
   fi
+
+  setup_http_repo_server \
+    "${offline_server_host}" "${offline_server_http_repo_port}" \
+    "${downloaddir}" "${downloaddir}/rpms" \
+    "${templatedir}/nginx.conf.tpl" "/etc/nginx/nginx.conf"
 
   backup_old_pip_repos
   configure_a_pip_repo \
@@ -96,6 +96,9 @@ kubespray_predeploy_offline() {
 
   setup_docker_service \
     "${offline_server_docker_data_root}" "${docker_registry}"
+
+  load_docker_registry \
+    "${downloaddir}/docker-images"
 
   setup_docker_registry_server \
     "${offline_server_host}" "${offline_server_docker_registry_port}" "${offline_server_docker_registry_data}"
@@ -108,8 +111,8 @@ kubespray_predeploy_offline() {
   template_env_file_for_kubespray \
     "${http_repo}" \
     "${http_repo}/centos" \
+    "${http_repo}/centos" \
     "${http_repo}/rpms" \
-    "${http_repo}/extra" \
     "${docker_registry}/k8s.gcr.io" \
     "${docker_registry}" \
     "${docker_registry}/quay.io" \

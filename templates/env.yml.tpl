@@ -2,10 +2,10 @@
 # Download
 http_repo: "${http_repo}"
 
-extras_rh_repo_base_url: "${centos_base_repo_url}"
+extras_rh_repo_base_url: "http://${centos_base_repo_url}"
 extras_rh_repo_gpgkey: ""
 
-docker_rh_repo_base_url: "${docker_rh_repo}"
+docker_rh_repo_base_url: "http://${docker_rh_repo}"
 docker_rh_repo_gpgkey: ""
 
 kube_image_repo: "${kube_image_repo}"
@@ -26,11 +26,11 @@ etcd_data_dir: /data/lib/etcd
 etcd_kubeadm_enabled: false
 
 # docker
-docker_version: '18.09'
+docker_version: '19.03'
 docker_daemon_graph: "${offline_server_docker_data_root}"
 docker_cert_dir: "/etc/docker/pki"
 docker_insecure_registries:
-  - registry.arksec.io:32443
+  - "${docker_image_repo}"
 
 # K8S Master
 kube_apiserver_node_port_range: "30000-33000"
